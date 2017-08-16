@@ -14,12 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.repro.ReproApplicationTests.ReproApplication;
@@ -72,10 +70,7 @@ public class ReproApplicationTests {
         log.info("{}", traceIds);
         assertThat(result).isEqualTo("there was an error");
         // This is what I get : testTraceIds != inDoOnErrorTraceId and inDoOnErrorTraceId == inMapTraceId
-        assertThat(traceIds.testTraceId).isNotEqualTo(traceIds.inDoOnErrorTraceId);
-        assertThat(traceIds.inDoOnErrorTraceId).isEqualTo(traceIds.inMapTraceId);
-
-        // But I rather expect the following which does not work as of today :
+        // But I rather expect the following which fails as of today :
         assertThat(traceIds.testTraceId) //
                 .isEqualTo(traceIds.inDoOnErrorTraceId) //
                 .isEqualTo(traceIds.inMapTraceId);
@@ -99,10 +94,9 @@ public class ReproApplicationTests {
         }
 
         @GetMapping
-        @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
         public ReproDto repro() throws InterruptedException {
             Thread.sleep(1000);
-            return new ReproDto("there was an error");
+            return new ReproDto("pheeeew this was long");
         }
 
         public static void main(String[] args) {
