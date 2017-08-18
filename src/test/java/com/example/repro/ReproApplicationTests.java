@@ -3,10 +3,15 @@ package com.example.repro;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.sleuth.Span.idToHex;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.netflix.hystrix.util.HystrixTimer;
+import com.netflix.hystrix.util.HystrixTimerHacker;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -80,6 +85,13 @@ public class ReproApplicationTests {
     @RestController("/repro")
     @EnableFeignClients
     public static class ReproApplication {
+
+        @Autowired BeanFactory beanFactory;
+
+        @PostConstruct
+        public void foo() {
+            new HystrixTimerHacker(beanFactory).hackHystrixTimer();
+        }
 
         @Data
         @AllArgsConstructor
